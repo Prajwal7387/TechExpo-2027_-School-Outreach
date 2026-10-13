@@ -21,7 +21,6 @@ export const Sidebar = ({ onOpenSupabaseModal }) => {
     schools,
     overdueFollowUps,
     currentUser,
-    isSupabaseLive,
   } = useApp();
 
   const highPriorityCount = schools.filter((s) => !s.is_archived && s.priority_score >= 75).length;
@@ -122,25 +121,23 @@ export const Sidebar = ({ onOpenSupabaseModal }) => {
         })}
       </nav>
 
-      {/* Supabase status indicator */}
+      {/* Data storage indicator */}
       <div className="p-3 mx-3 mb-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
             <Database className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="text-[11px] font-semibold text-slate-200">Database & Security</span>
+            <span className="text-[11px] font-semibold text-slate-200">Data Management</span>
           </div>
           <button
             onClick={onOpenSupabaseModal}
             className="text-[10px] text-indigo-400 hover:text-indigo-300 underline font-medium"
           >
-            Details
+            Manage
           </button>
         </div>
         <div className="flex items-center gap-2 text-[11px]">
-          <span className={`w-2 h-2 rounded-full ${isSupabaseLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-          <span className="text-slate-300 truncate">
-            {isSupabaseLive ? 'Supabase Live PostgREST' : 'Local Intelligence Store'}
-          </span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-slate-300 truncate">Local Storage • Offline Ready</span>
         </div>
       </div>
 

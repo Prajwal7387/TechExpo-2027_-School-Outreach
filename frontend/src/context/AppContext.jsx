@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { DEFAULT_CRITERIA_WEIGHTS, calculatePriorityScore } from '../data/criteriaConfig';
 import { INITIAL_SCHOOLS, getInitialSchoolsWithScores } from '../data/sampleSchools';
 import { TEAM_MEMBERS } from '../data/teamMembers';
@@ -13,11 +12,7 @@ const STORAGE_KEYS = {
 };
 
 export const AppProvider = ({ children }) => {
-  // 1. Supabase Connection Status
-  const [isSupabaseLive, setIsSupabaseLive] = useState(isSupabaseConfigured());
-  const [supabaseSession, setSupabaseSession] = useState(null);
-
-  // 2. Criteria Weights State
+  // 1. Criteria Weights State
   const [criteriaWeights, setCriteriaWeights] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.WEIGHTS);
@@ -136,45 +131,6 @@ export const AppProvider = ({ children }) => {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
     } catch (e) {}
   }, [currentUser]);
-
-  // 11. Listen for Supabase Auth state if configured
-  useEffect(() => {
-    if (!supabase) return;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSupabaseSession(session);
-      if (session?.user) {
-        setIsSupabaseLive(true);
-        // Map user to profile
-        setCurrentUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
-          email: session.user.email,
-          role: session.user.user_metadata?.role || 'member',
-          designation: session.user.user_metadata?.designation || 'Outreach Coordinator',
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${session.user.email}`,
-        });
-      }
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSupabaseSession(session);
-      if (session?.user) {
-        setCurrentUser({
-          id: session.user.id,
-          name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
-          email: session.user.email,
-          role: session.user.user_metadata?.role || 'member',
-          designation: session.user.user_metadata?.designation || 'Outreach Coordinator',
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${session.user.email}`,
-        });
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
 
   // Recalculate all school scores when weights change
   const updateCriteriaWeights = (newWeights) => {
@@ -443,8 +399,6 @@ export const AppProvider = ({ children }) => {
         selectedSchool,
         toasts,
         overdueFollowUps,
-        isSupabaseLive,
-        supabaseSession,
 
         // Actions
         setCurrentView,

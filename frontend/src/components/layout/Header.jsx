@@ -22,7 +22,6 @@ export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenSupabaseModa
     setSelectedSchoolId,
     setCurrentView,
     addToast,
-    isSupabaseLive,
     syncVerifiedIntelligence,
   } = useApp();
 
@@ -84,18 +83,14 @@ export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenSupabaseModa
           </select>
         </div>
 
-        {/* Database Status Button */}
+        {/* Data Management Button */}
         <button
           onClick={onOpenSupabaseModal}
-          className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-            isSupabaseLive
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-          }`}
-          title="Supabase PostgreSQL & RLS Status"
+          className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+          title="Data Management — Backup & Restore"
         >
           <Database className="w-3.5 h-3.5 text-indigo-600" />
-          <span>{isSupabaseLive ? 'Supabase Connected' : 'Local Storage Mode'}</span>
+          <span>Data Management</span>
         </button>
 
         {/* Sync Verified Data Button */}

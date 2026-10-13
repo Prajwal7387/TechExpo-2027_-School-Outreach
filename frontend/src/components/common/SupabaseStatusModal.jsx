@@ -1,15 +1,83 @@
-import React from 'react';
-import { Database, ShieldCheck, CheckCircle2, KeyRound, ExternalLink, X, Copy, Terminal } from 'lucide-react';
+import React, { useRef } from 'react';
+import { HardDrive, Download, Upload, Trash2, CheckCircle2, X, Database, FolderSync } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const SupabaseStatusModal = ({ isOpen, onClose }) => {
-  const { isSupabaseLive, addToast } = useApp();
+  const { schools, addToast, resetToSampleData, syncVerifiedIntelligence, criteriaWeights } = useApp();
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
-  const copyEnvTemplate = () => {
-    navigator.clipboard.writeText(`VITE_SUPABASE_URL=https://your-project.supabase.co\nVITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`);
-    addToast('success', 'Environment template copied to clipboard.');
+  const activeSchools = schools.filter((s) => !s.is_archived).length;
+  const archivedSchools = schools.filter((s) => s.is_archived).length;
+  const totalLogs = schools.reduce((acc, s) => acc + (s.outreach_history || []).length, 0);
+
+  // Calculate storage usage
+  let storageBytes = 0;
+  try {
+    for (let key in localStorage) {
+      if (key.startsWith('techexpo_')) {
+        storageBytes += (localStorage.getItem(key) || '').length * 2; // UTF-16
+      }
+    }
+  } catch {}
+  const storageKB = (storageBytes / 1024).toFixed(1);
+
+  const handleExportJSON = () => {
+    const backup = {
+      version: '1.0',
+      exported_at: new Date().toISOString(),
+      app: 'TechExpo 2027 School Intelligence & Outreach System',
+      data: {
+        schools,
+        criteriaWeights,
+      },
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `techexpo-2027-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    addToast('success', `Exported ${schools.length} schools and all settings to JSON backup file.`);
+  };
+
+  const handleImportJSON = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (imported?.data?.schools && Array.isArray(imported.data.schools)) {
+          localStorage.setItem('techexpo_schools_v4', JSON.stringify(imported.data.schools));
+          if (imported.data.criteriaWeights) {
+            localStorage.setItem('techexpo_criteria_weights_v1', JSON.stringify(imported.data.criteriaWeights));
+          }
+          addToast('success', `Imported ${imported.data.schools.length} schools from backup. Refreshing...`);
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          addToast('error', 'Invalid backup file. Expected { data: { schools: [...] } } format.');
+        }
+      } catch (err) {
+        addToast('error', `Failed to parse backup file: ${err.message}`);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm('⚠️ This will permanently delete ALL your school data, outreach logs, and settings. This action cannot be undone.\n\nAre you sure?')) {
+      localStorage.removeItem('techexpo_schools_v4');
+      localStorage.removeItem('techexpo_criteria_weights_v1');
+      localStorage.removeItem('techexpo_active_user_v1');
+      addToast('warning', 'All local data cleared. Reloading with fresh sample data...');
+      setTimeout(() => window.location.reload(), 1200);
+    }
   };
 
   return (
@@ -18,85 +86,125 @@ export const SupabaseStatusModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isSupabaseLive ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
-              <Database className="w-5 h-5" />
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-700">
+              <HardDrive className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Supabase PostgreSQL & Security Status</h3>
-              <p className="text-xs text-slate-500">Database connection, authentication, and RLS policies</p>
+              <h3 className="text-base font-semibold text-slate-900">Data Management</h3>
+              <p className="text-xs text-slate-500">Backup, restore, and manage your local school data</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 space-y-5">
-          {/* Status banner */}
-          <div className={`p-4 rounded-lg border flex items-start gap-3 ${isSupabaseLive ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-800'}`}>
-            {isSupabaseLive ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-            ) : (
-              <ShieldCheck className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
-            )}
+          {/* Storage status banner */}
+          <div className="p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-900 flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
             <div>
-              <div className="text-sm font-semibold">
-                {isSupabaseLive ? 'Connected to Live Supabase Backend' : 'Running in Interactive Local & Demo Mode'}
-              </div>
+              <div className="text-sm font-semibold">Running on Local Storage — No Database Required</div>
               <p className="text-xs mt-1 text-slate-600 leading-relaxed">
-                {isSupabaseLive
-                  ? 'Active session verified. Queries are routed through Supabase PostgREST with Row Level Security (RLS) enforcement.'
-                  : 'All modules (directory, priority scoring, outreach history, pitch generation, CSV import/export, and configurable weights) are fully operational with local persistence. You can connect your live Supabase project anytime.'}
+                All your data is stored safely in your browser's local storage. Export JSON backups regularly to safeguard your data. You can import backups to restore on any device.
               </p>
             </div>
           </div>
 
-          {/* Setup steps */}
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: 'Active Schools', value: activeSchools, color: 'text-indigo-700 bg-indigo-50 border-indigo-100' },
+              { label: 'Archived', value: archivedSchools, color: 'text-slate-600 bg-slate-50 border-slate-200' },
+              { label: 'Outreach Logs', value: totalLogs, color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+              { label: 'Storage Used', value: `${storageKB} KB`, color: 'text-amber-700 bg-amber-50 border-amber-100' },
+            ].map((stat) => (
+              <div key={stat.label} className={`p-3 rounded-lg border text-center ${stat.color}`}>
+                <div className="text-lg font-bold">{stat.value}</div>
+                <div className="text-[10px] font-medium uppercase tracking-wider">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Action buttons */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">How to connect your live Supabase Project</h4>
-            
-            <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-3 text-xs text-slate-700">
-              <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">1</span>
-                <div>
-                  <strong>Execute Schema:</strong> Open Supabase SQL Editor and run the generated SQL script located at:
-                  <code className="block mt-1 font-mono text-indigo-600 bg-white px-2 py-1 rounded border border-slate-200">
-                    backend/supabase/schema.sql
-                  </code>
-                </div>
-              </div>
+            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data Actions</h4>
 
-              <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">2</span>
-                <div>
-                  <strong>Configure Environment Variables:</strong> In <code className="font-mono bg-white px-1.5 py-0.5 rounded border">frontend/.env</code>, provide your credentials:
-                  <div className="relative mt-1 bg-slate-900 text-slate-200 font-mono p-2.5 rounded text-[11px] overflow-x-auto">
-                    VITE_SUPABASE_URL=https://your-id.supabase.co<br />
-                    VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
-                    <button
-                      onClick={copyEnvTemplate}
-                      className="absolute top-2 right-2 p-1 text-slate-400 hover:text-white"
-                      title="Copy template"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Export JSON */}
+              <button
+                onClick={handleExportJSON}
+                className="flex items-center gap-3 p-4 rounded-lg border border-slate-200 bg-white hover:bg-indigo-50 hover:border-indigo-200 transition-all text-left group"
+              >
+                <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
+                  <Download className="w-4 h-4" />
                 </div>
-              </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Export Backup</div>
+                  <div className="text-[11px] text-slate-500">Download all data as JSON file</div>
+                </div>
+              </button>
 
-              <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">3</span>
-                <div>
-                  <strong>Security Best Practice:</strong> Only the public <span className="font-semibold text-slate-900">anon key</span> is used in the frontend. The <span className="text-rose-600 font-semibold">service-role key is never exposed</span>.
+              {/* Import JSON */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-3 p-4 rounded-lg border border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 transition-all text-left group"
+              >
+                <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200 transition-colors">
+                  <Upload className="w-4 h-4" />
                 </div>
-              </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Import Backup</div>
+                  <div className="text-[11px] text-slate-500">Restore data from JSON file</div>
+                </div>
+              </button>
+
+              {/* Reset to Sample */}
+              <button
+                onClick={() => {
+                  syncVerifiedIntelligence();
+                  onClose();
+                }}
+                className="flex items-center gap-3 p-4 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 hover:border-amber-200 transition-all text-left group"
+              >
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-600 group-hover:bg-amber-200 transition-colors">
+                  <FolderSync className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Reset to Defaults</div>
+                  <div className="text-[11px] text-slate-500">Restore original 17 verified schools</div>
+                </div>
+              </button>
+
+              {/* Clear All */}
+              <button
+                onClick={handleClearAll}
+                className="flex items-center gap-3 p-4 rounded-lg border border-rose-100 bg-white hover:bg-rose-50 hover:border-rose-200 transition-all text-left group"
+              >
+                <div className="p-2 rounded-lg bg-rose-100 text-rose-600 group-hover:bg-rose-200 transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Clear All Data</div>
+                  <div className="text-[11px] text-rose-500">Permanently delete everything</div>
+                </div>
+              </button>
             </div>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportJSON}
+            className="hidden"
+          />
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end">
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <p className="text-[11px] text-slate-400">💡 Tip: Export a backup before clearing data or switching devices</p>
           <button
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
