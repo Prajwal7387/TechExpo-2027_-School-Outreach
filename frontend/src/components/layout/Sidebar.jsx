@@ -86,7 +86,7 @@ export const Sidebar = ({ onOpenDataManagementModal }) => {
               Gujarat
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">School Intelligence & Outreach</p>
+          <p className="text-[11px] text-amber-300 font-semibold">Conducted by Parul University</p>
         </div>
       </div>
 

@@ -61,7 +61,12 @@ export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenDataManageme
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-xs">
       {/* Title & context */}
       <div>
-        <h2 className="text-base font-bold text-slate-900 leading-tight">{title}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-slate-900 leading-tight">{title}</h2>
+          <span className="hidden xl:inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+            🏛️ Parul University
+          </span>
+        </div>
         <p className="text-xs text-slate-500 hidden sm:block">{subtitle}</p>
       </div>
 

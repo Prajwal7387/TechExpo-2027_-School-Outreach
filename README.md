@@ -1,8 +1,10 @@
 # TechExpo 2027: School Intelligence & Outreach System
+### Conducted & Hosted by Parul University (Vadodara, Gujarat)
 
-**TechExpo School Intelligence & Outreach System** is an executive-grade administrative platform purpose-built for managing and prioritizing institutional outreach across schools and junior colleges in Gujarat, India, for **TechExpo 2027**.
+**TechExpo School Intelligence & Outreach System** is an executive-grade administrative platform purpose-built for managing and prioritizing institutional outreach across schools and junior colleges in Gujarat, India, for **TechExpo 2027**, proudly conducted by **Parul University**.
 
 [![Repository](https://img.shields.io/badge/GitHub-TechExpo--2027--School--Outreach-indigo?style=flat&logo=github)](https://github.com/Prajwal7387/TechExpo-2027_-School-Outreach)
+[![Host](https://img.shields.io/badge/Host-Parul%20University%2C%20Vadodara-amber?style=flat&logo=target)](https://paruluniversity.ac.in)
 [![Deployed on Vercel](https://img.shields.io/badge/Vercel-Ready-black?style=flat&logo=vercel)](https://vercel.com)
 [![Vercel KV](https://img.shields.io/badge/Database-Vercel%20KV%20%2F%20Upstash%20Redis%20(Free)-red?style=flat&logo=redis)](https://upstash.com)
 [![React](https://img.shields.io/badge/React-18-blue?style=flat&logo=react)](https://react.dev)
@@ -61,14 +63,15 @@ Configurable 5-point evaluation algorithm:
 - **Overdue Follow-Up Engine:** Flags actions past their deadline with direct "Mark Completed" and "Reschedule" controls.
 - **Interactive Activity Logging:** Modal for logging discussions, commitments, and scheduling the next follow-up.
 
-### 7. Grounded Pitch Assistant
-- **Zero Hallucination Guarantee:** Generates suggested outreach collateral strictly grounded in verified school facts (real contacts, board, city, ATL labs, awards) and approved TechExpo 2027 collateral.
+### 7. Grounded Pitch Assistant (Conducted by Parul University)
+- **Zero Hallucination Guarantee:** Generates suggested outreach collateral strictly grounded in verified school facts, approved TechExpo 2027 collateral, and official Parul University credentials.
+- **Dynamic City-Specific Campus Connectivity:** Automatically calculates and injects tailored travel routes, distances, chartered bus options, and campus reception details connecting each Gujarat school's city to the Parul University Campus in Vadodara.
 - **Multi-Stakeholder Formats:**
   - Principal / Head of Institution Invitation Email
   - STEM Coordinator WhatsApp Direct Connect
   - 60-Second Phone Pitch Call Script (with objection handling)
-  - Official Invitation Delegation Letter
-- **Team Review & Actions:** Editable canvas with word counters, 1-click clipboard copy, TXT file export, and direct "Save as Outreach Log" button.
+  - Official Parul University Delegation Invitation Letter
+- **Team Review & Actions:** Interactive draft regeneration, angle focus switcher (Standard, Transit, Robotics), editable canvas with word counters, 1-click clipboard copy, TXT file export, and direct "Save as Outreach Log" button.
 
 ### 8. Team Management & Security (RBAC)
 - **Role-Based Access Control:**

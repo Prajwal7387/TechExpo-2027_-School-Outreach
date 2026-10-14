@@ -15,7 +15,8 @@ import {
   Users,
   ChevronRight,
   ExternalLink,
-  PhoneForwarded
+  PhoneForwarded,
+  GraduationCap
 } from 'lucide-react';
 
 export const DashboardView = ({ onOpenOutreachModal }) => {
@@ -72,6 +73,34 @@ export const DashboardView = ({ onOpenOutreachModal }) => {
 
   return (
     <div className="space-y-6">
+      {/* HOST INSTITUTION & EVENT BANNER */}
+      <div className="bg-gradient-to-r from-indigo-950 via-slate-900 to-indigo-900 rounded-xl p-4 sm:p-5 text-white shadow-sm border border-indigo-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-bold text-white tracking-wide">TechExpo 2027</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">
+                Conducted by Parul University
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5">
+              Host Campus: Parul University, Vadodara, Gujarat &bull; Multi-Corridor Outreach & Institutional Delegation Pipeline
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          <button
+            onClick={() => setCurrentView('pitch')}
+            className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Open Pitch Assistant</span>
+          </button>
+        </div>
+      </div>
       {/* OVERDUE FOLLOW-UPS ALERT BANNER */}
       {overdueCount > 0 && (
         <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-2xs">
