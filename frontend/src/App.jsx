@@ -3,7 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { ToastContainer } from './components/common/ToastContainer';
-import { SupabaseStatusModal } from './components/common/SupabaseStatusModal';
+import { DataManagementModal } from './components/common/DataManagementModal';
 
 // Modals
 import { SchoolModal } from './components/modals/SchoolModal';
@@ -28,7 +28,7 @@ const MainAppContent = () => {
   const [isOutreachModalOpen, setIsOutreachModalOpen] = useState(false);
   const [outreachTargetSchoolId, setOutreachTargetSchoolId] = useState('');
   const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+  const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
 
   const handleOpenOutreach = (schoolId = '') => {
     setOutreachTargetSchoolId(schoolId);
@@ -42,7 +42,7 @@ const MainAppContent = () => {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 font-sans">
       {/* Sidebar Navigation */}
-      <Sidebar onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)} />
+      <Sidebar onOpenDataManagementModal={() => setIsDataManagementOpen(true)} />
 
       {/* Main Workspace */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -50,7 +50,7 @@ const MainAppContent = () => {
         <Header
           onOpenAddModal={() => setIsAddSchoolOpen(true)}
           onOpenOutreachModal={() => handleOpenOutreach()}
-          onOpenSupabaseModal={() => setIsSupabaseModalOpen(true)}
+          onOpenDataManagementModal={() => setIsDataManagementOpen(true)}
         />
 
         {/* View Content */}
@@ -115,9 +115,9 @@ const MainAppContent = () => {
         onClose={() => setIsCsvImportOpen(false)}
       />
 
-      <SupabaseStatusModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
+      <DataManagementModal
+        isOpen={isDataManagementOpen}
+        onClose={() => setIsDataManagementOpen(false)}
       />
 
       {/* Toast Feedback Alerts */}

@@ -14,13 +14,15 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-export const Sidebar = ({ onOpenSupabaseModal }) => {
+export const Sidebar = ({ onOpenDataManagementModal, onOpenSupabaseModal }) => {
+  const handleOpenDataManagement = onOpenDataManagementModal || onOpenSupabaseModal;
   const {
     currentView,
     setCurrentView,
     schools,
     overdueFollowUps,
     currentUser,
+    isKVConnected,
   } = useApp();
 
   const highPriorityCount = schools.filter((s) => !s.is_archived && s.priority_score >= 75).length;
@@ -129,15 +131,17 @@ export const Sidebar = ({ onOpenSupabaseModal }) => {
             <span className="text-[11px] font-semibold text-slate-200">Data Management</span>
           </div>
           <button
-            onClick={onOpenSupabaseModal}
+            onClick={handleOpenDataManagement}
             className="text-[10px] text-indigo-400 hover:text-indigo-300 underline font-medium"
           >
             Manage
           </button>
         </div>
         <div className="flex items-center gap-2 text-[11px]">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-slate-300 truncate">Local Storage • Offline Ready</span>
+          <span className={`w-2 h-2 rounded-full ${isKVConnected ? 'bg-emerald-400' : 'bg-indigo-400'} animate-pulse`}></span>
+          <span className="text-slate-300 truncate">
+            {isKVConnected ? 'Vercel KV • Cloud Synced' : 'Local Storage • KV Ready'}
+          </span>
         </div>
       </div>
 

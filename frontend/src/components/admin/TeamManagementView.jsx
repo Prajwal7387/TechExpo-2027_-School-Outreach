@@ -22,7 +22,6 @@ export const TeamManagementView = () => {
     setCurrentUser,
     schools,
     addToast,
-    isSupabaseLive,
   } = useApp();
 
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -108,11 +107,11 @@ export const TeamManagementView = () => {
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-          <div className="text-xs font-semibold text-slate-500 mb-1">Database Security Enforcement</div>
+          <div className="text-xs font-semibold text-slate-500 mb-1">Access Control & Security</div>
           <div className="text-2xl font-bold text-emerald-600">
-            {isSupabaseLive ? 'Supabase RLS Active' : 'RBAC Local Sandbox'}
+            RBAC Active
           </div>
-          <div className="text-[11px] text-slate-500 mt-1">Row Level Security enabled</div>
+          <div className="text-[11px] text-slate-500 mt-1">Role-Based Access Control enforced</div>
         </div>
       </div>
 

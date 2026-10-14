@@ -12,7 +12,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 
-export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenSupabaseModal }) => {
+export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenDataManagementModal, onOpenSupabaseModal }) => {
+  const handleOpenDataManagement = onOpenDataManagementModal || onOpenSupabaseModal;
   const {
     currentView,
     currentUser,
@@ -85,7 +86,7 @@ export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenSupabaseModa
 
         {/* Data Management Button */}
         <button
-          onClick={onOpenSupabaseModal}
+          onClick={handleOpenDataManagement}
           className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
           title="Data Management — Backup & Restore"
         >

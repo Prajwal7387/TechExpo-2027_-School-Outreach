@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import { DEFAULT_CRITERIA_WEIGHTS, calculatePriorityScore } from '../data/criteriaConfig';
 import { INITIAL_SCHOOLS, getInitialSchoolsWithScores } from '../data/sampleSchools';
 import { TEAM_MEMBERS } from '../data/teamMembers';
+import {
+  isKVConfigured,
+  pingKV,
+  syncSchoolsToKV,
+  fetchSchoolsFromKV,
+  syncWeightsToKV,
+  fetchWeightsFromKV,
+} from '../lib/kvClient';
 
 const AppContext = createContext(null);
 
@@ -107,30 +115,137 @@ export const AppProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // 8. Persist Schools to LocalStorage
+  // 8. Vercel KV / Upstash Redis Cloud Database State
+  const [isKVConnected, setIsKVConnected] = useState(isKVConfigured());
+  const [kvLatency, setKvLatency] = useState(null);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+  const [lastCloudSyncTime, setLastCloudSyncTime] = useState(null);
+
+  // Initial health check and background cloud pull if Vercel KV is configured
+  useEffect(() => {
+    if (!isKVConfigured()) return;
+
+    let isMounted = true;
+    (async () => {
+      const ping = await pingKV();
+      if (!isMounted) return;
+      if (ping.ok) {
+        setIsKVConnected(true);
+        setKvLatency(ping.latency);
+
+        // Fetch remote schools
+        const remoteSchools = await fetchSchoolsFromKV();
+        if (remoteSchools && remoteSchools.length > 0 && isMounted) {
+          setSchools(remoteSchools);
+          setLastCloudSyncTime(new Date().toLocaleTimeString());
+        }
+
+        // Fetch remote weights
+        const remoteWeights = await fetchWeightsFromKV();
+        if (remoteWeights && isMounted) {
+          setCriteriaWeights(remoteWeights);
+        }
+      } else {
+        setIsKVConnected(false);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 9. Persist Schools to LocalStorage and Auto-Sync to Vercel KV
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.SCHOOLS, JSON.stringify(schools));
     } catch (e) {
       console.error('Error saving schools to localStorage', e);
     }
+
+    if (isKVConfigured()) {
+      const timer = setTimeout(async () => {
+        setIsCloudSyncing(true);
+        const res = await syncSchoolsToKV(schools);
+        setIsCloudSyncing(false);
+        if (res.ok) {
+          setLastCloudSyncTime(new Date().toLocaleTimeString());
+        }
+      }, 1200);
+      return () => clearTimeout(timer);
+    }
   }, [schools]);
 
-  // 9. Persist Weights to LocalStorage and Recalculate Schools
+  // 10. Persist Weights to LocalStorage and Auto-Sync to Vercel KV
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.WEIGHTS, JSON.stringify(criteriaWeights));
     } catch (e) {
       console.error('Error saving weights to localStorage', e);
     }
+
+    if (isKVConfigured()) {
+      syncWeightsToKV(criteriaWeights);
+    }
   }, [criteriaWeights]);
 
-  // 10. Persist Active User
+  // 11. Persist Active User
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
     } catch (e) {}
   }, [currentUser]);
+
+  // Manual Cloud Actions
+  const syncToCloudNow = async () => {
+    if (!isKVConfigured()) {
+      addToast('warning', 'Vercel KV / Upstash Redis credentials not configured. Running on local storage.');
+      return;
+    }
+    setIsCloudSyncing(true);
+    const [resSchools, resWeights] = await Promise.all([
+      syncSchoolsToKV(schools),
+      syncWeightsToKV(criteriaWeights),
+    ]);
+    setIsCloudSyncing(false);
+    if (resSchools.ok && resWeights.ok) {
+      setLastCloudSyncTime(new Date().toLocaleTimeString());
+      addToast('success', `Cloud sync complete! ${schools.length} schools and weights backed up to Vercel KV.`);
+    } else {
+      addToast('error', `Cloud sync failed: ${resSchools.error || resWeights.error || 'Check credentials'}`);
+    }
+  };
+
+  const pullFromCloudNow = async () => {
+    if (!isKVConfigured()) {
+      addToast('warning', 'Vercel KV / Upstash Redis credentials not configured.');
+      return;
+    }
+    setIsCloudSyncing(true);
+    const [remoteSchools, remoteWeights] = await Promise.all([
+      fetchSchoolsFromKV(),
+      fetchWeightsFromKV(),
+    ]);
+    setIsCloudSyncing(false);
+    if (remoteSchools && remoteSchools.length > 0) {
+      setSchools(remoteSchools);
+      if (remoteWeights) setCriteriaWeights(remoteWeights);
+      setLastCloudSyncTime(new Date().toLocaleTimeString());
+      addToast('success', `Loaded ${remoteSchools.length} schools from Vercel KV cloud storage.`);
+    } else {
+      addToast('info', 'No existing records found in Vercel KV. Push current local data to initialize.');
+    }
+  };
+
+  const checkKVHealth = async () => {
+    if (!isKVConfigured()) return { ok: false, error: 'Credentials missing' };
+    const ping = await pingKV();
+    setIsKVConnected(ping.ok);
+    if (ping.ok) {
+      setKvLatency(ping.latency);
+    }
+    return ping;
+  };
 
   // Recalculate all school scores when weights change
   const updateCriteriaWeights = (newWeights) => {
@@ -399,6 +514,15 @@ export const AppProvider = ({ children }) => {
         selectedSchool,
         toasts,
         overdueFollowUps,
+
+        // Vercel KV / Upstash Cloud Database
+        isKVConnected,
+        kvLatency,
+        isCloudSyncing,
+        lastCloudSyncTime,
+        syncToCloudNow,
+        pullFromCloudNow,
+        checkKVHealth,
 
         // Actions
         setCurrentView,

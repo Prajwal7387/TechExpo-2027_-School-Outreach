@@ -1,6 +1,13 @@
 # TechExpo 2027: School Intelligence & Outreach System
 
-**TechExpo School Intelligence & Outreach System** is an executive-grade, full-stack administrative platform purpose-built for managing and prioritizing institutional outreach across schools and junior colleges in Gujarat, India, for **TechExpo 2027**.
+**TechExpo School Intelligence & Outreach System** is an executive-grade administrative platform purpose-built for managing and prioritizing institutional outreach across schools and junior colleges in Gujarat, India, for **TechExpo 2027**.
+
+[![Repository](https://img.shields.io/badge/GitHub-TechExpo--2027--School--Outreach-indigo?style=flat&logo=github)](https://github.com/Prajwal7387/TechExpo-2027_-School-Outreach)
+[![Deployed on Vercel](https://img.shields.io/badge/Vercel-Ready-black?style=flat&logo=vercel)](https://vercel.com)
+[![Vercel KV](https://img.shields.io/badge/Database-Vercel%20KV%20%2F%20Upstash%20Redis%20(Free)-red?style=flat&logo=redis)](https://upstash.com)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat&logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-5-purple?style=flat&logo=vite)](https://vitejs.dev)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38bdf8?style=flat&logo=tailwindcss)](https://tailwindcss.com)
 
 ---
 
@@ -69,32 +76,41 @@ Configurable 5-point evaluation algorithm:
   - **Member:** Can log outreach, generate pitches, update school data, and manage their assigned portfolio.
 - **Simulated Profile Switcher:** Built-in top bar switcher for testing Admin vs. Member access permissions during development and demos.
 
+### 9. Database & Storage Architecture
+- **Dual-Engine Persistence:**
+  - **Cloud Mode:** **Vercel KV / Upstash Redis** — 100% Free tier (10,000 commands/day, 256MB), natively supported by Vercel with zero credit card required. Synchronizes school data and weights across devices via REST API (`@upstash/redis`).
+  - **Offline / Local Mode:** Instant fallback to browser `localStorage` when offline or when cloud credentials are not supplied.
+- **JSON Backup & Restore:** 1-click export of all school records and scoring weights to timestamped JSON files.
+- **Instant Reset:** Quick recovery to the 17 verified Gujarat schools at any time.
+
 ---
 
 ## 🛠️ Technology Stack
 
 - **Frontend:** React 18 with Vite
 - **Styling:** Tailwind CSS v3.4 (with PostCSS & Autoprefixer)
-- **Database:** Supabase PostgreSQL with Row Level Security (RLS)
-- **Authentication:** Supabase Auth (with offline fallback and interactive demo persistence)
+- **Database:** Vercel KV / Upstash Redis (100% Free Tier, Serverless REST API)
+- **Client Cache & Fallback:** Browser LocalStorage Engine
 - **Icons:** Lucide React (`lucide-react`)
+- **Deployment Platform:** Vercel (configured via `vercel.json` with SPA routing)
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-TechExpo@2027/
+TechExpo-2027_-School-Outreach/
 ├── backend/
+│   ├── README.md                # Optional SQL database architecture notes
 │   └── supabase/
-│       ├── schema.sql           # PostgreSQL table definitions, RLS policies, & triggers
-│       └── seed.sql             # Default scoring weights & official pitch collateral
+│       ├── schema.sql           # Optional PostgreSQL tables, RLS & triggers
+│       └── seed.sql             # Optional seed weights & approved pitch collateral
 ├── frontend/
 │   ├── public/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── admin/           # Priority Weights & Team Management Views
-│   │   │   ├── common/          # Badges, ConfirmModal, Toast, SupabaseStatusModal
+│   │   │   ├── common/          # Badges, ConfirmModal, Toast, DataManagementModal
 │   │   │   ├── dashboard/       # Executive Dashboard with visual conversion funnel
 │   │   │   ├── layout/          # Sidebar and Header components
 │   │   │   ├── modals/          # Add/Edit School, Log Outreach, CSV Import Modals
@@ -102,20 +118,22 @@ TechExpo@2027/
 │   │   │   ├── pitch/           # Grounded Pitch Assistant View
 │   │   │   └── schools/         # School Directory & School Profile Views
 │   │   ├── context/
-│   │   │   └── AppContext.jsx   # Global state, persistence, calculation engine
+│   │   │   └── AppContext.jsx   # Global state, persistence, Vercel KV cloud sync
 │   │   ├── data/
 │   │   │   ├── criteriaConfig.js# Default criteria weights & scoring algorithm
-│   │   │   ├── sampleSchools.js # 20 curated schools across Gujarat
+│   │   │   ├── sampleSchools.js # 17 curated, verified schools across Gujarat
 │   │   │   └── teamMembers.js   # Team member profiles and regional hubs
 │   │   ├── lib/
-│   │   │   └── supabaseClient.js# Supabase client initializer & config validator
+│   │   │   └── kvClient.js      # Vercel KV / Upstash Redis client & sync helpers
 │   │   ├── App.jsx              # Application root
 │   │   ├── index.css            # Tailwind directives & typography
 │   │   └── main.jsx             # React DOM entry point
-│   ├── .env.example             # Supabase environment variables template
+│   ├── .env.example             # Environment configuration template
 │   ├── tailwind.config.js       # Tailwind CSS theme and color tokens
 │   ├── vite.config.js           # Vite build configuration
+│   ├── vercel.json              # Vercel SPA routing configuration
 │   └── package.json
+├── vercel.json                  # Root Vercel deployment configuration
 └── README.md
 ```
 
@@ -123,62 +141,52 @@ TechExpo@2027/
 
 ## ⚡ Quick Start & Setup Instructions
 
-### 1. Prerequisites
-- **Node.js:** v18.x or later
-- **npm:** v10.x or later
-
-### 2. Installation
-Navigate into the `frontend` directory and install dependencies:
+### 1. Clone the Repository
 ```bash
-cd frontend
+git clone https://github.com/Prajwal7387/TechExpo-2027_-School-Outreach.git
+cd TechExpo-2027_-School-Outreach/frontend
+```
+
+### 2. Install Dependencies
+```bash
 npm install
 ```
 
-### 3. Running Locally (Interactive Demo Mode)
-The application works immediately out-of-the-box with 20 realistic Gujarat school profiles, interactive CSV tools, live score recalculation, and LocalStorage persistence:
+### 3. Start Development Server
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## 🗄️ Supabase PostgreSQL Configuration
+## ☁️ Deploying to Vercel with Free Vercel KV Database
 
-To link your live Supabase database and authentication backend:
+### Step 1: Deploy Project on Vercel
+1. Import your GitHub repository into [Vercel](https://vercel.com).
+2. The project will automatically be recognized as a **Vite** project thanks to [`vercel.json`](file:///c:/Users/prajw/Desktop/Tech%20Expo/TechExpo@2027/vercel.json).
+3. Click **Deploy**.
 
-### Step 1: Create a Supabase Project
-1. Log in to [Supabase](https://supabase.com) and create a new project.
-2. Go to the **SQL Editor** in the Supabase dashboard.
+### Step 2: Attach Free Vercel KV (Upstash Redis)
+1. Go to your project on the **Vercel Dashboard**.
+2. Click on the **Storage** tab at the top.
+3. Click **Create Database** &rarr; Select **KV (Serverless Redis by Upstash)**.
+4. Select the **Hobby / Free Plan** (10,000 requests/day, 256MB — $0/month, no credit card required).
+5. Click **Create**.
+6. In **Project Settings** &rarr; **Environment Variables**, ensure the following variables are exposed to the frontend with the `VITE_` prefix:
+   ```env
+   VITE_KV_REST_API_URL=https://your-database-id.upstash.io
+   VITE_KV_REST_API_TOKEN=your-upstash-rest-token
+   ```
+7. Redeploy on Vercel.
 
-### Step 2: Apply Database Schema & Policies
-Copy and execute the entire contents of:
-[`backend/supabase/schema.sql`](file:///c:/Users/prajw/Desktop/Tech%20Expo/TechExpo@2027/backend/supabase/schema.sql)
-
-This script automatically sets up:
-- Tables: `schools`, `profiles`, `scoring_criteria_weights`, `outreach_logs`, and `pitch_templates`.
-- Row Level Security (RLS) policies protecting school contacts and restricting weight updates to administrators.
-- Triggers for updating timestamps and registering profiles upon auth sign-up.
-
-Next, execute [`backend/supabase/seed.sql`](file:///c:/Users/prajw/Desktop/Tech%20Expo/TechExpo@2027/backend/supabase/seed.sql) to populate initial scoring criteria weights and approved pitch collateral.
-
-### Step 3: Set Environment Variables
-In `frontend/`:
-```bash
-cp .env.example .env
-```
-Edit `frontend/.env` with your project URL and public Anon Key:
-```env
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-> **Security Note:** Never expose your Supabase `service_role` secret key in the frontend repository or `.env` file. Only the public `anon` key is permitted.
+Your application is now fully connected to a live cloud database on Vercel, with automatic multi-device synchronization and local offline caching!
 
 ---
 
-## 📊 Sample Preloaded Gujarat Schools
-The application includes realistic sample data across Gujarat educational hubs:
+## 📊 Preloaded Gujarat Schools
+The application includes verified intelligence across Gujarat educational hubs:
 - **Ahmedabad:** Delhi Public School Bopal, Udgam School for Children, The Riverside School, St. Xavier's High School Loyola Hall, Prakash Higher Secondary, Ahmedabad International School (AIS).
 - **Vadodara:** Navrachana Higher Secondary School Sama, Cygnus World School.
 - **Surat:** Delhi Public School Surat, Essar International School Hazira, Fountainhead School, Tapti Valley International School.
@@ -188,8 +196,8 @@ The application includes realistic sample data across Gujarat educational hubs:
 
 ---
 
-## 🧪 Production Build
-To validate the production bundle:
+## 🧪 Production Build & Validation
+To test and validate the production bundle:
 ```bash
 cd frontend
 npm run build
