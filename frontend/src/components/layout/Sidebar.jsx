@@ -14,8 +14,8 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-export const Sidebar = ({ onOpenDataManagementModal, onOpenSupabaseModal }) => {
-  const handleOpenDataManagement = onOpenDataManagementModal || onOpenSupabaseModal;
+export const Sidebar = ({ onOpenDataManagementModal }) => {
+  const handleOpenDataManagement = onOpenDataManagementModal;
   const {
     currentView,
     setCurrentView,

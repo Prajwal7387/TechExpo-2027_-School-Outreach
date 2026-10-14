@@ -100,11 +100,6 @@ Configurable 5-point evaluation algorithm:
 
 ```text
 TechExpo-2027_-School-Outreach/
-├── backend/
-│   ├── README.md                # Optional SQL database architecture notes
-│   └── supabase/
-│       ├── schema.sql           # Optional PostgreSQL tables, RLS & triggers
-│       └── seed.sql             # Optional seed weights & approved pitch collateral
 ├── frontend/
 │   ├── public/
 │   ├── src/

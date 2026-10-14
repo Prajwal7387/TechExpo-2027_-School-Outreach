@@ -340,6 +340,3 @@ export const DataManagementModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-
-// Backward-compatible alias
-export const SupabaseStatusModal = DataManagementModal;

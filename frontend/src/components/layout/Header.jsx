@@ -12,8 +12,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 
-export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenDataManagementModal, onOpenSupabaseModal }) => {
-  const handleOpenDataManagement = onOpenDataManagementModal || onOpenSupabaseModal;
+export const Header = ({ onOpenAddModal, onOpenOutreachModal, onOpenDataManagementModal }) => {
+  const handleOpenDataManagement = onOpenDataManagementModal;
   const {
     currentView,
     currentUser,
